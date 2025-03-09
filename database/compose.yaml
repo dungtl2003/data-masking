@@ -1,0 +1,18 @@
+services:
+  msqldb:
+    container_name: data-masking-db
+    image: mysql:9.2.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456a@
+      MYSQL_DATABASE: data-masking
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: testpass123
+    volumes:
+      - data-masking-db-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint/init.sql
+    ports:
+      - "3306:3306"
+
+volumes:
+  data-masking-db-data:
+    name: data-masking-db-data

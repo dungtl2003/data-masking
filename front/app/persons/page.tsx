@@ -41,7 +41,6 @@ export default function Page() {
                 }
             })
             .then((data) => {
-                console.log(data);
                 setPersons(data);
             })
             .catch((err) => {
