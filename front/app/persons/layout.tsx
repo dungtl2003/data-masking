@@ -32,11 +32,13 @@ export default function Layout({
         const logoutEndpoint =
             process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/logout";
         setIsLoading(true);
+        const token = getCookie("access_token")!.valueOf();
         const id = toast.loading("Logging out...");
         fetch(logoutEndpoint, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
             },
             credentials: "include",
         })

@@ -1,11 +1,13 @@
 CREATE TABLE person (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    gender VARCHAR(6) CHECK (gender IN ('male', 'female')),
-    city VARCHAR(100),
-    phone_number VARCHAR(15)
+    gender VARBINARY(255) NOT NULL,
+    city VARBINARY(255) NOT NULL,
+    phone_number VARBINARY(255) NOT NULL,
+    private_key VARBINARY(255) NOT NULL,
+    decrypt_frequency VARBINARY(255) NOT NULL
 );
 
 CREATE TABLE person_refresh_token (

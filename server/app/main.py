@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.middleware import AuthMiddleware
 from app.config import LOGGING_CONFIG
 from app.health import api_router as health_router
 from app.api.v1.route import api_router as api_v1_router
@@ -25,6 +26,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuthMiddleware)
 
 app.include_router(health_router)
 app.include_router(api_v1_router)

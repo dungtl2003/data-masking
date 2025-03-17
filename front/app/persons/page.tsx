@@ -10,6 +10,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import React from "react";
+import {getCookie} from "cookies-next/client";
+import {toast} from "sonner";
 
 interface Person {
     id: number;
@@ -26,10 +28,14 @@ export default function Page() {
     React.useEffect(() => {
         const personsEndpoint =
             process.env.NEXT_PUBLIC_API_ENDPOINT + "/persons";
+        const token = getCookie("access_token")!.valueOf();
+        const toastId = toast.loading("Fetching persons...");
+
         fetch(personsEndpoint, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
             },
             credentials: "include",
         })
@@ -45,6 +51,9 @@ export default function Page() {
             })
             .catch((err) => {
                 console.error("Failed to fetch persons", err);
+            })
+            .finally(() => {
+                toast.dismiss(toastId);
             });
     }, []);
     return (

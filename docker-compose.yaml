@@ -1,0 +1,54 @@
+services:
+  client:
+    container_name: data-masking-client
+    image: ilikeblue/data-masking-client:latest
+    ports:
+      - "3000:80"
+    env_file:
+      - .env.client
+    networks:
+      - data-masking-network
+
+  server:
+    container_name: data-masking-server
+    image: ilikeblue/data-masking-server:latest
+    ports:
+      - "8000:80"
+    env_file:
+      - .env.server
+    networks:
+      - data-masking-network
+      - data-masking-db-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: data-masking-db
+    image: mysql:9.2.0
+    env_file:
+      - .env.db
+    volumes:
+      - data-masking-db-data:/var/lib/mysql
+    networks:
+      - data-masking-db-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      start_interval: 10s # wait for 10s before starting healthcheck
+      interval: 30s # check every 30s
+      timeout: 5s # timeout after 5s
+      retries: 5 # retry 5 times
+
+
+volumes:
+  data-masking-db-data:
+    external: true
+    name: data-masking-db-data
+
+networks:
+  data-masking-network:
+    driver: bridge
+    name: data-masking-network
+  data-masking-db-network:
+    driver: bridge
+    name: data-masking-db-network

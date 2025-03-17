@@ -9,12 +9,13 @@ from fastapi.responses import JSONResponse
 from mysql.connector.types import RowType
 
 from app.api.v1.auth.model import LoginModel
-from preload import mydb, settings
+from app.preload import settings, mydb
+
 
 api_router = APIRouter(prefix="/auth")
 
 
-def create_token(id: int, username: str, gender: str, city: str, duration: int):
+def create_token(id: int, username: str, duration: int):
     """
     create a token with the given data and duration (in hours)
     """
@@ -25,8 +26,6 @@ def create_token(id: int, username: str, gender: str, city: str, duration: int):
         {
             "id": id,
             "username": username,
-            "gender": gender,
-            "city": city,
             "iat": iat,
             "exp": exp,
         },
@@ -39,7 +38,7 @@ def create_token(id: int, username: str, gender: str, city: str, duration: int):
 async def login(login_data: LoginModel):
     logger = logging.getLogger("uvicorn")
 
-    sql = "SELECT id, username, password, gender, city FROM person WHERE email = %s"
+    sql = "SELECT id, username, password FROM person WHERE email = %s"
     val = (login_data.email,)
     mycursor = mydb.cursor()
     mycursor.execute(sql, val)
@@ -69,11 +68,9 @@ async def login(login_data: LoginModel):
 
     id = int(str(result[0]))
     username = str(result[1])
-    gender = str(result[3])
-    city = str(result[4])
 
-    access_token = create_token(id, username, gender, city, 1)
-    refresh_token = create_token(id, username, gender, city, 24)
+    access_token = create_token(id, username, 1)
+    refresh_token = create_token(id, username, 24)
 
     logger.debug("saving refresh token")
     sql = "INSERT INTO person_refresh_token (person_id, token) VALUES (%s, %s)"
@@ -152,8 +149,6 @@ async def refresh(request: Request):
 
     id = int(str(decoded_token["id"]))
     username = str(decoded_token["username"])
-    gender = str(decoded_token["gender"])
-    city = str(decoded_token["city"])
 
     sql = "SELECT token FROM person_refresh_token WHERE token = %s"
     val = (refresh_token,)
@@ -178,8 +173,8 @@ async def refresh(request: Request):
     mycursor.execute(sql, val)
     mydb.commit()
 
-    access_token = create_token(id, username, gender, city, 1)
-    refresh_token = create_token(id, username, gender, city, 24)
+    access_token = create_token(id, username, 1)
+    refresh_token = create_token(id, username, 24)
 
     logger.debug("saving refresh token")
     sql = "INSERT INTO person_refresh_token (person_id, token) VALUES (%s, %s)"

@@ -43,10 +43,9 @@ export const config = {
 };
 
 async function auth(request: NextRequest) {
+    const apiEndpoint = process.env.API_ENDPOINT;
     const {pathname} = request.nextUrl;
-    const authEndpoint = new URL(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/authorize"
-    );
+    const authEndpoint = new URL(apiEndpoint + "/auth/authorize");
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
 
@@ -70,11 +69,11 @@ async function auth(request: NextRequest) {
 
             return NextResponse.next();
         }
+
+        cookieStore.delete("access_token");
     }
 
-    const refreshEndpoint = new URL(
-        process.env.NEXT_PUBLIC_API_ENDPOINT + "/auth/refresh"
-    );
+    const refreshEndpoint = new URL(apiEndpoint + "/auth/refresh");
     const resp = await fetch(refreshEndpoint, {
         method: "GET",
         headers: request.headers,
@@ -88,7 +87,6 @@ async function auth(request: NextRequest) {
             pathname === "/"
         ) {
             const {access_token} = await resp.json();
-            cookieStore.delete("access_token");
             cookieStore.set("access_token", access_token);
             return NextResponse.redirect(new URL("/persons", request.url));
         }
