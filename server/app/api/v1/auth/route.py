@@ -17,10 +17,10 @@ api_router = APIRouter(prefix="/auth")
 
 def create_token(id: int, username: str, duration: int):
     """
-    create a token with the given data and duration (in hours)
+    create a token with the given data and duration (in minutes)
     """
     iat = datetime.datetime.now(tz=datetime.timezone.utc)
-    exp = iat + datetime.timedelta(hours=duration)
+    exp = iat + datetime.timedelta(minutes=duration)
 
     return jwt.encode(
         {
@@ -69,8 +69,8 @@ async def login(login_data: LoginModel):
     id = int(str(result[0]))
     username = str(result[1])
 
-    access_token = create_token(id, username, 1)
-    refresh_token = create_token(id, username, 24)
+    access_token = create_token(id, username, settings.at_duration_minutes)
+    refresh_token = create_token(id, username, settings.rt_duration_minutes)
 
     logger.debug("saving refresh token")
     sql = "INSERT INTO person_refresh_token (person_id, token) VALUES (%s, %s)"
@@ -87,7 +87,7 @@ async def login(login_data: LoginModel):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        max_age=60 * 60 * 24,
+        max_age=60 * settings.rt_duration_minutes,
     )
 
     return response
@@ -173,10 +173,10 @@ async def refresh(request: Request):
     mycursor.execute(sql, val)
     mydb.commit()
 
-    access_token = create_token(id, username, 1)
-    refresh_token = create_token(id, username, 24)
+    access_token = create_token(id, username, settings.at_duration_minutes)
+    refresh_token = create_token(id, username, settings.rt_duration_minutes)
 
-    logger.debug("saving refresh token")
+    logger.debug(f"saving refresh token {refresh_token}")
     sql = "INSERT INTO person_refresh_token (person_id, token) VALUES (%s, %s)"
     val = (id, refresh_token)
     mycursor.execute(sql, val)
@@ -184,7 +184,7 @@ async def refresh(request: Request):
 
     response = JSONResponse(
         status_code=200,
-        content={"token": access_token},
+        content={"access_token": access_token, "refresh_token": refresh_token},
     )
 
     # save refresh token in cookie
@@ -192,7 +192,7 @@ async def refresh(request: Request):
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        max_age=60 * 60 * 24,
+        max_age=60 * settings.rt_duration_minutes,
     )
 
     return response

@@ -31,6 +31,14 @@ class Settings:
         jwt_secret = os.getenv("JWT_SECRET")
         assert jwt_secret is not None, "JWT_SECRET must be provided"
 
+        at_duration_minutes = os.getenv("AT_DURATION_MINUTES")
+        if at_duration_minutes is not None and not at_duration_minutes.isnumeric():
+            raise ValueError("AT_DURATION_MINUTES must be a number")
+
+        rt_duration_minutes = os.getenv("RT_DURATION_MINUTES")
+        if rt_duration_minutes is not None and not rt_duration_minutes.isnumeric():
+            raise ValueError("RT_DURATION_MINUTES must be a number")
+
         origins = os.getenv("ORIGINS")
         origins = [] if origins is None else origins.split(",")
 
@@ -57,6 +65,12 @@ class Settings:
         self.db_password = password
         self.db_database = database
         self.jwt_secret = jwt_secret
+        self.at_duration_minutes = (
+            int(at_duration_minutes) if at_duration_minutes is not None else 15
+        )  # 15 minutes
+        self.rt_duration_minutes = (
+            int(rt_duration_minutes) if rt_duration_minutes is not None else 1440
+        )  # 1 day
         self.origins = origins
         self.master_key = bytes.fromhex(master_key)
         self.subkey_rotation_counter = (

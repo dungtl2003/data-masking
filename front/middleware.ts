@@ -39,10 +39,28 @@ export async function middleware(request: NextRequest) {
 
 // Only run this middleware on these routes
 export const config = {
-    matcher: ["/", "/login", "/persons", "/signup"],
+    matcher: [
+        "/",
+        "/login",
+        "/persons",
+        "/signup",
+        "/refresh",
+        "/refresh-error",
+    ],
 };
 
 async function auth(request: NextRequest) {
+    console.log("from request", request.url);
+
+    if (
+        request.nextUrl.pathname === "/refresh" ||
+        request.nextUrl.pathname === "/login" ||
+        request.nextUrl.pathname === "/signup"
+    ) {
+        console.log("Skipping auth for refresh, login, or signup");
+        return NextResponse.next();
+    }
+
     const apiEndpoint = process.env.API_ENDPOINT;
     const {pathname} = request.nextUrl;
     const authEndpoint = new URL(apiEndpoint + "/auth/authorize");
@@ -59,44 +77,24 @@ async function auth(request: NextRequest) {
         });
 
         if (resp.status === 200) {
-            if (
-                pathname === "/login" ||
-                pathname === "/signup" ||
-                pathname === "/"
-            ) {
+            if (pathname !== "/persons") {
                 return NextResponse.redirect(new URL("/persons", request.url));
             }
 
             return NextResponse.next();
         }
 
+        console.log("Access token invalid");
         cookieStore.delete("access_token");
+    } else {
+        console.log("Access token not found");
     }
 
-    const refreshEndpoint = new URL(apiEndpoint + "/auth/refresh");
-    const resp = await fetch(refreshEndpoint, {
-        method: "GET",
-        headers: request.headers,
-        credentials: "include",
-    });
-
-    if (resp.status === 200) {
-        if (
-            pathname === "/login" ||
-            pathname === "/signup" ||
-            pathname === "/"
-        ) {
-            const {access_token} = await resp.json();
-            cookieStore.set("access_token", access_token);
-            return NextResponse.redirect(new URL("/persons", request.url));
-        }
-
-        return NextResponse.next();
+    if (pathname !== "/refresh-error") {
+        console.log("Redirecting to refresh");
+        return NextResponse.redirect(new URL("/refresh", request.url));
     }
 
-    if (pathname !== "/login" && pathname !== "/signup") {
-        return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    return NextResponse.next();
+    console.log("Refresh error, redirecting to login");
+    return NextResponse.redirect(new URL("/login", request.url));
 }

@@ -3,6 +3,7 @@ from typing import Tuple
 
 
 # GF(2^128) defined by 1 + a + a^2 + a^7 + a^128
+# 0xE1000000000000000000000000000000: 1 + a + a^2 + a^7
 # Please note the MSB is x0 and LSB is x127
 def gf_2_128_mul(x, y):
     assert x < (1 << 128)

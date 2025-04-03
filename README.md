@@ -44,6 +44,8 @@ The default client endpoint will be `http://localhost:3000` and the default serv
 | SERVER_ENDPOINT | The server endpoint | Yes | | http://data-masking-server |
 | NEXT_PUBLIC_API_ENDPOINT | The API endpoint | Yes | | http://localhost:8000/api/v1 |
 | API_ENDPOINT | The same as `NEXT_PUBLIC_API_ENDPOINT`, but `NEXT_PUBLIC_API_ENDPOINT` is used in the client side, whereas `API_ENDPOINT` is used in the server side (they can be different when using docker) | Yes | | http://data-masking-server/api/v1 |
+| AT_DURATION_MINUTES | The access token duration in minutes | No | 15 | 60 |
+| RT_DURATION_MINUTES | The refresh token duration in minutes | No | 1440 | 120 |
 
 ### Server
 

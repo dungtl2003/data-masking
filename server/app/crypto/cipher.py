@@ -96,7 +96,6 @@ class AESCipher:
         # state is a flat list of 16 bytes ([b0, b1, b2, ... b15], [b0, b1, b2, b3] is a column)
 
         # PKCS7 Padding
-        # if len(state) = 16, add full block of padding ([0x00]*16)
         state = state + [16 - len(state)] * (
             16 - len(state)
         )  # Fails test if it changes the input with +=

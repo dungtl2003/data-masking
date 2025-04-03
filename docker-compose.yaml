@@ -35,7 +35,7 @@ services:
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       start_interval: 10s # wait for 10s before starting healthcheck
-      interval: 30s # check every 30s
+      interval: 10s # check every 30s
       timeout: 5s # timeout after 5s
       retries: 5 # retry 5 times
 

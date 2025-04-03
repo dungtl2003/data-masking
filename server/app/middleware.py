@@ -26,6 +26,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/v1/auth/login",
             "/api/v1/auth/refresh",
             "/api/v1/auth/signup",
+            "/api/v1/auth/logout",
         ]:
             response = await call_next(request)
             return response
